@@ -31,7 +31,7 @@ A React-based quiz application that fetches questions from the Open Trivia Datab
 
 1. Clone the repository
    ```
-   git clone https://github.com/yourusername/quiz-app.git
+   git clone https://github.com/Shevabey/quiz-app.git
    cd quiz-app
    ```
 
