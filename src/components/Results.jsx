@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 export default function Results({ username, questions, score, quizHistory, onReset, onLogout }) {
   const [selectedQuizId, setSelectedQuizId] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   
   const currentQuiz = {
     date: new Date().toISOString(),
@@ -18,6 +19,15 @@ export default function Results({ username, questions, score, quizHistory, onRes
   const unanswered = quizToDisplay.questions.filter(q => !q.userAnswer).length;
   const incorrect = quizToDisplay.questions.length - quizToDisplay.score - unanswered;
   
+  const handleStartNewQuiz = async () => {
+    setIsLoading(true);
+    try {
+      await onReset();
+    } catch (error) {
+      console.error('Error starting new quiz:', error);
+    }
+  };
+  
   return (
     <div className="card bg-base-100 shadow-xl">
       <div className="card-body">
@@ -26,6 +36,7 @@ export default function Results({ username, questions, score, quizHistory, onRes
           <button 
             onClick={onLogout}
             className="btn btn-sm btn-outline btn-error"
+            disabled={isLoading}
           >
             Logout
           </button>
@@ -39,6 +50,7 @@ export default function Results({ username, questions, score, quizHistory, onRes
               <button 
                 onClick={() => setSelectedQuizId(null)}
                 className={`btn btn-sm ${!selectedQuizId ? 'btn-primary' : 'btn-outline'}`}
+                disabled={isLoading}
               >
                 Current Quiz
               </button>
@@ -48,6 +60,7 @@ export default function Results({ username, questions, score, quizHistory, onRes
                   key={quiz.id || index}
                   onClick={() => setSelectedQuizId(quiz.id)}
                   className={`btn btn-sm ${selectedQuizId === quiz.id ? 'btn-primary' : 'btn-outline'}`}
+                  disabled={isLoading}
                 >
                   Attempt {index + 1} - {new Date(quiz.date).toLocaleDateString()} 
                   ({quiz.score}/{quiz.totalQuestions})
@@ -87,10 +100,18 @@ export default function Results({ username, questions, score, quizHistory, onRes
         {!selectedQuizId && (
           <div className="flex justify-center mb-6">
             <button 
-              onClick={onReset}
+              onClick={handleStartNewQuiz}
               className="btn btn-primary"
+              disabled={isLoading}
             >
-              Start New Quiz
+              {isLoading ? (
+                <>
+                  <span className="loading loading-spinner loading-sm"></span>
+                  Loading New Quiz...
+                </>
+              ) : (
+                'Start New Quiz'
+              )}
             </button>
           </div>
         )}

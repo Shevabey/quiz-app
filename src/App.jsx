@@ -27,28 +27,42 @@ function App() {
     logout,
   } = useQuiz(10, 300); // 10 questions, 5 minutes
 
+  // Loading component
+  const LoadingScreen = () => (
+    <div className="flex justify-center items-center min-h-screen">
+      <div className="text-center">
+        <span className="loading loading-spinner loading-lg"></span>
+        <p className="mt-4">Loading quiz questions...</p>
+      </div>
+    </div>
+  );
+
   // Custom route protection logic
   const ProtectedQuizRoute = ({ children }) => {
     if (!username) {
       return <Navigate to="/" replace />;
     }
-
-    if (quizStatus !== "active") {
+    
+    if (quizStatus !== 'active' && quizStatus !== 'reloading') {
       return <Navigate to="/" replace />;
     }
-
+    
+    if (quizStatus === 'reloading') {
+      return <LoadingScreen />;
+    }
+    
     return children;
   };
-
+  
   const ProtectedResultsRoute = ({ children }) => {
     if (!username) {
       return <Navigate to="/" replace />;
     }
-
-    if (quizStatus !== "completed") {
+    
+    if (quizStatus !== 'completed') {
       return <Navigate to="/" replace />;
     }
-
+    
     return children;
   };
 
@@ -59,9 +73,9 @@ function App() {
           <Route
             path="/"
             element={
-              username && quizStatus === "active" ? (
+              username && (quizStatus === 'active' || quizStatus === 'reloading') ? (
                 <Navigate to="/quiz" replace />
-              ) : username && quizStatus === "completed" ? (
+              ) : username && quizStatus === 'completed' ? (
                 <Navigate to="/results" replace />
               ) : (
                 <Login onStart={startQuiz} error={error} />
@@ -73,13 +87,8 @@ function App() {
             path="/quiz"
             element={
               <ProtectedQuizRoute>
-                {quizStatus === "loading" ? (
-                  <div className="flex justify-center items-center min-h-screen">
-                    <div className="text-center">
-                      <span className="loading loading-spinner loading-lg"></span>
-                      <p className="mt-4">Loading quiz questions...</p>
-                    </div>
-                  </div>
+                {quizStatus === 'loading' || quizStatus === 'reloading' ? (
+                  <LoadingScreen />
                 ) : (
                   <Quiz
                     currentQuestion={currentQuestion}

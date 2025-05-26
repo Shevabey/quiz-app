@@ -8,7 +8,7 @@ export const useQuiz = (amount = 10, timeLimit = 300) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(timeLimit);
-  const [quizStatus, setQuizStatus] = useState('login'); // login, loading, active, completed
+  const [quizStatus, setQuizStatus] = useState('login'); // login, loading, active, completed, reloading
   const [error, setError] = useState(null);
   const [quizHistory, setQuizHistory] = useState([]);
   const [currentQuizId, setCurrentQuizId] = useState(null);
@@ -17,13 +17,13 @@ export const useQuiz = (amount = 10, timeLimit = 300) => {
   useEffect(() => {
     try {
       const savedState = loadQuizState();
-      if (savedState && savedState.quizStatus === 'active') {
+      if (savedState && (savedState.quizStatus === 'active' || savedState.quizStatus === 'reloading')) {
         setUsername(savedState.username || '');
         setQuestions(savedState.questions || []);
         setCurrentQuestionIndex(savedState.currentQuestionIndex || 0);
         setScore(savedState.score || 0);
         setTimeRemaining(savedState.timeRemaining || timeLimit);
-        setQuizStatus(savedState.quizStatus);
+        setQuizStatus(savedState.quizStatus === 'reloading' ? 'reloading' : 'active');
         setCurrentQuizId(savedState.currentQuizId);
       }
       
@@ -42,7 +42,7 @@ export const useQuiz = (amount = 10, timeLimit = 300) => {
 
   // Save state when it changes
   useEffect(() => {
-    if (quizStatus === 'active' && username) {
+    if ((quizStatus === 'active' || quizStatus === 'reloading') && username) {
       try {
         saveQuizState({
           username,
@@ -165,9 +165,34 @@ export const useQuiz = (amount = 10, timeLimit = 300) => {
     }
   };
 
-  const resetQuiz = () => {
-    // Start a new quiz with the same username
-    startQuiz(username);
+  const resetQuiz = async () => {
+    try {
+      // Set reloading state to prevent redirect to login
+      setQuizStatus('reloading');
+      
+      // Generate a unique quiz ID
+      const newQuizId = `quiz_${Date.now()}`;
+      setCurrentQuizId(newQuizId);
+      
+      // Fetch new questions
+      const fetchedQuestions = await fetchQuizQuestions(amount);
+      
+      if (!fetchedQuestions || fetchedQuestions.length === 0) {
+        throw new Error('No questions returned from API');
+      }
+      
+      // Update state with new quiz
+      setQuestions(fetchedQuestions);
+      setCurrentQuestionIndex(0);
+      setScore(0);
+      setTimeRemaining(timeLimit);
+      setQuizStatus('active');
+      setError(null);
+    } catch (err) {
+      console.error('Error resetting quiz:', err);
+      setError(`Failed to load new quiz questions: ${err.message}`);
+      setQuizStatus('completed'); // Return to results if there's an error
+    }
   };
   
   const logout = () => {
