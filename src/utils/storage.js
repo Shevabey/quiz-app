@@ -49,15 +49,12 @@ export const loadQuizHistory = (username) => {
 
 export const clearUserData = (username) => {
   try {
-    // Clear current quiz state
     clearQuizState();
     
-    // Clear user history if username is provided
     if (username) {
       localStorage.removeItem(`${HISTORY_PREFIX}${username}`);
     }
     
-    // Clear any other user-specific data here
   } catch (error) {
     console.error('Error clearing user data from localStorage:', error);
   }

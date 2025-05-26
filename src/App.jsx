@@ -25,9 +25,8 @@ function App() {
     answerQuestion,
     resetQuiz,
     logout,
-  } = useQuiz(10, 300); // 10 questions, 5 minutes
+  } = useQuiz(10, 300);
 
-  // Loading component
   const LoadingScreen = () => (
     <div className="flex justify-center items-center min-h-screen">
       <div className="text-center">
@@ -37,7 +36,6 @@ function App() {
     </div>
   );
 
-  // Custom route protection logic
   const ProtectedQuizRoute = ({ children }) => {
     if (!username) {
       return <Navigate to="/" replace />;

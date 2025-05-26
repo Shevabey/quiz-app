@@ -1,12 +1,9 @@
 export default function Timer({ timeRemaining }) {
-  // Format time as MM:SS
+
   const minutes = Math.floor(timeRemaining / 60);
-  const seconds = timeRemaining % 60;
-  
+  const seconds = timeRemaining % 60;  
   const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  
-  // Calculate percentage for progress bar
-  const timePercentage = (timeRemaining / 300) * 100; // Assuming 5 minutes (300 seconds) total
+  const timePercentage = (timeRemaining / 300) * 100; 
   
   return (
     <div className="flex flex-col items-center mb-4">

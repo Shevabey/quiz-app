@@ -11,7 +11,7 @@ export default function Results({ username, questions, score, quizHistory, onRes
     questions
   };
   
-  // Get the quiz to display (either current or from history)
+  
   const quizToDisplay = selectedQuizId 
     ? quizHistory.find(q => q.id === selectedQuizId) 
     : currentQuiz;

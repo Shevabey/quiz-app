@@ -9,8 +9,7 @@ export function useAuth() {
 export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState('');
-  
-  // Check localStorage on initial load
+
   useEffect(() => {
     const savedState = localStorage.getItem('quiz_state');
     if (savedState) {

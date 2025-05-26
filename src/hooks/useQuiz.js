@@ -8,12 +8,12 @@ export const useQuiz = (amount = 10, timeLimit = 300) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(timeLimit);
-  const [quizStatus, setQuizStatus] = useState('login'); // login, loading, active, completed, reloading
+  const [quizStatus, setQuizStatus] = useState('login');
   const [error, setError] = useState(null);
   const [quizHistory, setQuizHistory] = useState([]);
   const [currentQuizId, setCurrentQuizId] = useState(null);
 
-  // Load saved state on initial render
+  
   useEffect(() => {
     try {
       const savedState = loadQuizState();
@@ -27,7 +27,6 @@ export const useQuiz = (amount = 10, timeLimit = 300) => {
         setCurrentQuizId(savedState.currentQuizId);
       }
       
-      // Load quiz history if username exists
       if (savedState && savedState.username) {
         const history = loadQuizHistory(savedState.username);
         if (history) {
@@ -36,11 +35,11 @@ export const useQuiz = (amount = 10, timeLimit = 300) => {
       }
     } catch (err) {
       console.error('Error loading saved state:', err);
-      clearQuizState(); // Clear potentially corrupted state
+      clearQuizState();
     }
   }, [timeLimit]);
 
-  // Save state when it changes
+  
   useEffect(() => {
     if ((quizStatus === 'active' || quizStatus === 'reloading') && username) {
       try {
@@ -59,7 +58,7 @@ export const useQuiz = (amount = 10, timeLimit = 300) => {
     }
   }, [username, questions, currentQuestionIndex, score, timeRemaining, quizStatus, currentQuizId]);
 
-  // Timer logic
+  
   useEffect(() => {
     let timer;
     if (quizStatus === 'active' && timeRemaining > 0) {
@@ -77,14 +76,11 @@ export const useQuiz = (amount = 10, timeLimit = 300) => {
     return () => clearInterval(timer);
   }, [quizStatus, timeRemaining]);
 
-  // Function to complete the quiz and save to history
   const completeQuiz = () => {
     if (quizStatus === 'active' && username) {
-      // Calculate final score
       const finalScore = questions.reduce((total, q) => 
         q.userAnswer === q.correctAnswer ? total + 1 : total, 0);
       
-      // Create quiz result entry
       const quizResult = {
         id: currentQuizId,
         date: new Date().toISOString(),
@@ -98,14 +94,11 @@ export const useQuiz = (amount = 10, timeLimit = 300) => {
         }))
       };
       
-      // Update history
       const updatedHistory = [...quizHistory, quizResult];
       setQuizHistory(updatedHistory);
       
-      // Save to storage
       saveQuizHistory(username, updatedHistory);
       
-      // Update state
       setScore(finalScore);
       setQuizStatus('completed');
     }
@@ -117,11 +110,9 @@ export const useQuiz = (amount = 10, timeLimit = 300) => {
       setUsername(name);
       setQuizStatus('loading');
       
-      // Generate a unique quiz ID
       const newQuizId = `quiz_${Date.now()}`;
       setCurrentQuizId(newQuizId);
       
-      // Load history if it's a returning user
       if (!existingUser) {
         const history = loadQuizHistory(name);
         if (history) {
@@ -167,21 +158,17 @@ export const useQuiz = (amount = 10, timeLimit = 300) => {
 
   const resetQuiz = async () => {
     try {
-      // Set reloading state to prevent redirect to login
       setQuizStatus('reloading');
       
-      // Generate a unique quiz ID
       const newQuizId = `quiz_${Date.now()}`;
       setCurrentQuizId(newQuizId);
       
-      // Fetch new questions
       const fetchedQuestions = await fetchQuizQuestions(amount);
       
       if (!fetchedQuestions || fetchedQuestions.length === 0) {
         throw new Error('No questions returned from API');
       }
       
-      // Update state with new quiz
       setQuestions(fetchedQuestions);
       setCurrentQuestionIndex(0);
       setScore(0);
@@ -191,15 +178,12 @@ export const useQuiz = (amount = 10, timeLimit = 300) => {
     } catch (err) {
       console.error('Error resetting quiz:', err);
       setError(`Failed to load new quiz questions: ${err.message}`);
-      setQuizStatus('completed'); // Return to results if there's an error
+      setQuizStatus('completed'); 
     }
   };
   
   const logout = () => {
-    // Clear all user data
     clearUserData(username);
-    
-    // Reset state
     setUsername('');
     setQuestions([]);
     setCurrentQuestionIndex(0);

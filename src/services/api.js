@@ -1,6 +1,5 @@
 const API_URL = 'https://opentdb.com/api.php';
 
-// Helper function to decode HTML entities
 const decodeHTML = (html) => {
   const txt = document.createElement('textarea');
   txt.innerHTML = html;
@@ -50,7 +49,7 @@ export const fetchQuizQuestions = async (amount = 10, category = '', difficulty 
   }
 };
 
-// Add function to get a session token
+
 export const getSessionToken = async () => {
   try {
     const response = await fetch('https://opentdb.com/api_token.php?command=request');
